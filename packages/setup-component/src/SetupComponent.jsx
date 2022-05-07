@@ -1,5 +1,4 @@
-import React, { Children, Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Button from '@splunk/react-ui/Button';
 import Heading from '@splunk/react-ui/Heading';
 import List from '@splunk/react-ui/List';
@@ -8,11 +7,26 @@ import Text from '@splunk/react-ui/Text';
 import ColumnLayout from '@splunk/react-ui/ColumnLayout';
 import { defaultFetchInit, handleResponse, handleError } from '@splunk/splunk-utils/fetch';
 
+async function updateConf() {
+    const fetchInit = defaultFetchInit;
+    fetchInit.method = 'POST';
+    const n = await fetch(
+        'http://localhost:8001/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/setup-example-app',
+
+        {
+            ...fetchInit,
+            body: 'configured=true',
+        }
+    );
+
+    return n;
+}
+
 /* Function to create a Password */
 async function createPassword(password) {
     const fetchInit = defaultFetchInit;
     fetchInit.method = 'POST';
-    const realm = 'app';
+    const realm = 'testRealm7';
     const user = 'user1';
 
     const n = await fetch(
@@ -29,19 +43,11 @@ async function createPassword(password) {
 }
 
 class SetupComponent extends Component {
-    /* static propTypes = {
-        name: PropTypes.string,
-    };
-
-    static defaultProps = {
-        name: 'User',
-    }; */
-
     constructor(props) {
         super(props);
 
         // Initialize State
-        this.state = { passwordSet: false };
+        this.state = { passwordSet: false, isConfigured: false };
 
         // Bind Functions
         this.passwordClick = this.passwordClick.bind(this);
@@ -57,6 +63,14 @@ class SetupComponent extends Component {
                 console.log(this.state.passwordSet);
             }
         });
+        updateConf().then((response) => {
+            if (response.status >= 200 && response.status <= 299) {
+                this.setState({ isConfigured: true });
+                console.log(this.state.isConfigured);
+            }
+        });
+
+        window.location.href = 'http://localhost:8001/en-US/app/setup-example-app/search';
     }
 
     render() {
@@ -92,7 +106,7 @@ class SetupComponent extends Component {
                                                     </Link>
                                                     <List style={{ margin: 0 }}>
                                                         <List.Item>
-                                                            Sets the [install] stanza's
+                                                            Sets the [install] stanza
                                                             `is_configured` property to `true`
                                                         </List.Item>
                                                     </List>
@@ -144,7 +158,6 @@ class SetupComponent extends Component {
                                                     inline
                                                     type="password"
                                                     value={this.state.value}
-                                                    onChange={this.handleChange}
                                                 />{' '}
                                             </div>
                                             <Heading level={2}>Complete the Setup</Heading>
@@ -159,6 +172,14 @@ class SetupComponent extends Component {
                                                     label="Perform Setup"
                                                     name="setup_button"
                                                     onClick={this.passwordClick}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Button
+                                                    type="submit"
+                                                    label="Check passwords"
+                                                    name="check_button"
+                                                    onClick={this.getPasswords}
                                                 />
                                             </div>
                                             <br />

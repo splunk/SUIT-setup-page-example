@@ -6,7 +6,7 @@ import { SplunkThemeProvider } from '@splunk/themes';
 
 import { defaultTheme, getThemeOptions } from '@splunk/splunk-utils/themes';
 
-import { StyledContainer, StyledGreeting } from './StartStyles';
+import { StyledContainer } from './StartStyles';
 
 const themeProviderSettings = getThemeOptions(defaultTheme() || 'enterprise');
 
