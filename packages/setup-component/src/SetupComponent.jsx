@@ -5,8 +5,11 @@ import List from '@splunk/react-ui/List';
 import Link from '@splunk/react-ui/Link';
 import Text from '@splunk/react-ui/Text';
 import ColumnLayout from '@splunk/react-ui/ColumnLayout';
-import { defaultFetchInit, handleError } from '@splunk/splunk-utils/fetch';
+import { defaultFetchInit } from '@splunk/splunk-utils/fetch';
 // import { defaultFetchInit, handleResponse, handleError } from '@splunk/splunk-utils/fetch';
+
+const passwordsEndpoint =
+    'http://localhost:8000/en-US/splunkd/__raw/servicesNS/nobody/setup-example-app/storage/passwords';
 
 async function updateAppConf() {
     // function to update app.conf is_configured property to true when password is successfully added
@@ -14,7 +17,7 @@ async function updateAppConf() {
     const fetchInit = defaultFetchInit; // from splunk-utils API
     fetchInit.method = 'POST';
     const n = await fetch(
-        'http://localhost:8001/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/setup-example-app',
+        'http://localhost:8000/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/setup-example-app',
 
         {
             ...fetchInit,
@@ -32,14 +35,9 @@ async function createPassword(password) {
     const realm = 'testRealm';
     const user = 'user';
 
-    const n = await fetch(
-        'http://localhost:8001/en-US/splunkd/__raw/servicesNS/nobody/setup-example-app/storage/passwords',
-        {
-            ...fetchInit,
-            body: `name=${user}&password=${password}&realm=${realm}`, // put password into passwords.conf
-        }
-    ).then((response) => {
-        return response;
+    const n = await fetch(`${passwordsEndpoint}`, {
+        ...fetchInit,
+        body: `name=${user}&password=${password}&realm=${realm}`, // put password into passwords.conf
     });
 
     return n;
@@ -63,7 +61,7 @@ const SetupComponent = () => {
                         if (r.status >= 200 && r.status <= 299) {
                             // if app.conf is successfully updated, then reload the page
                             window.location.href =
-                                'http://localhost:8001/en-US/app/setup-example-app/search';
+                                'http://localhost:8000/en-US/app/setup-example-app/search';
                         }
                     });
                 } else {
