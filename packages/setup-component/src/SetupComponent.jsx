@@ -5,11 +5,11 @@ import List from '@splunk/react-ui/List';
 import Link from '@splunk/react-ui/Link';
 import Text from '@splunk/react-ui/Text';
 import ColumnLayout from '@splunk/react-ui/ColumnLayout';
-import { defaultFetchInit } from '@splunk/splunk-utils/fetch';
+import { defaultFetchInit, handleResponse } from '@splunk/splunk-utils/fetch';
 // import { defaultFetchInit, handleResponse, handleError } from '@splunk/splunk-utils/fetch';
 
 const passwordsEndpoint =
-    'http://localhost:8000/en-US/splunkd/__raw/servicesNS/nobody/setup-example-app/storage/passwords';
+    '/en-US/splunkd/__raw/servicesNS/nobody/setup-example-app/storage/passwords';
 
 async function updateAppConf() {
     // function to update app.conf is_configured property to true when password is successfully added
@@ -24,6 +24,18 @@ async function updateAppConf() {
             body: 'configured=true', // update the configured property
         }
     );
+
+    return n;
+}
+
+async function getPasswords() {
+    const fetchInit = defaultFetchInit; // from splunk-utils API
+    fetchInit.method = 'GET';
+    const n = await fetch(`${passwordsEndpoint}?output_mode=json`, {
+        ...fetchInit,
+    }).then((response) => {
+        return response.json();
+    });
 
     return n;
 }
@@ -50,6 +62,7 @@ const SetupComponent = () => {
     const [isValid, setValid] = useState(false);
 
     console.log(password);
+    console.log(getPasswords());
 
     const passwordClick = () => {
         if (isValid) {
