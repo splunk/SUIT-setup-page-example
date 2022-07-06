@@ -5,7 +5,7 @@ import List from '@splunk/react-ui/List';
 import Link from '@splunk/react-ui/Link';
 import Text from '@splunk/react-ui/Text';
 import ColumnLayout from '@splunk/react-ui/ColumnLayout';
-import { defaultFetchInit } from '@splunk/splunk-utils/fetch';
+import { defaultFetchInit, handleError } from '@splunk/splunk-utils/fetch';
 // import { defaultFetchInit, handleResponse, handleError } from '@splunk/splunk-utils/fetch';
 
 async function updateAppConf() {
@@ -49,22 +49,36 @@ const SetupComponent = () => {
     // create state variables using state hooks
 
     const [password, setPassword] = useState();
+    const [isValid, setValid] = useState(false);
+
     console.log(password);
 
     const passwordClick = () => {
-        createPassword(password).then((response) => {
-            if (response.status >= 200 && response.status <= 299) {
-                // check if password was successfully stored
-                updateAppConf().then((r) => {
-                    // update app.conf
-                    if (r.status >= 200 && r.status <= 299) {
-                        // if app.conf is successfully updated, then reload the page
-                        window.location.href =
-                            'http://localhost:8001/en-US/app/setup-example-app/search';
-                    }
-                });
-            }
-        });
+        if (isValid) {
+            createPassword(password).then((response) => {
+                if (response.status >= 200 && response.status <= 299) {
+                    // check if password was successfully stored
+                    updateAppConf().then((r) => {
+                        // update app.conf
+                        if (r.status >= 200 && r.status <= 299) {
+                            // if app.conf is successfully updated, then reload the page
+                            window.location.href =
+                                'http://localhost:8001/en-US/app/setup-example-app/search';
+                        }
+                    });
+                } else {
+                    console.log('error');
+                }
+            });
+        }
+    };
+
+    const handleUserInput = (event) => {
+        if (event.target.value.length > 5) {
+            setValid(true);
+        } else {
+            setValid(false);
+        }
     };
 
     return (
@@ -149,6 +163,7 @@ const SetupComponent = () => {
                                             value={password}
                                             onChange={(e) => {
                                                 setPassword(e.target.value); // store the password that the user inputs into state
+                                                handleUserInput(e);
                                             }}
                                         />{' '}
                                     </div>
