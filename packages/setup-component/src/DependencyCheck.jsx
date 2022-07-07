@@ -1,60 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@splunk/react-ui/Button';
 import Heading from '@splunk/react-ui/Heading';
 import List from '@splunk/react-ui/List';
 import Link from '@splunk/react-ui/Link';
-import Text from '@splunk/react-ui/Text';
-import ColumnLayout from '@splunk/react-ui/ColumnLayout';
-import { defaultFetchInit, handleError } from '@splunk/splunk-utils/fetch';
+import { defaultFetchInit, handleError, handleResponse } from '@splunk/splunk-utils/fetch';
 // import { defaultFetchInit, handleResponse, handleError } from '@splunk/splunk-utils/fetch';
 
-const appsEndpoint =
-    'http://localhost:8000/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/';
+const appsEndpoint = '/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/'; // this is the endpoint that will get us in the apps list
+
 async function getApps() {
+    // this function will fetch a list of apps from the apps endpoint
+
     const fetchInit = defaultFetchInit; // from splunk-utils API
     fetchInit.method = 'GET';
-    const n = await fetch(`${appsEndpoint}?output_mode=json`, {
+    const n = await fetch(`${appsEndpoint}?output_mode=json&count=100`, {
         ...fetchInit,
-    })
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            return data;
-        });
+    }).then(handleResponse(200));
+
+    return n;
+}
+
+async function updateAppConf() {
+    // function to update app.conf is_configured property to true when password is successfully added
+
+    const fetchInit = defaultFetchInit; // from splunk-utils API
+    fetchInit.method = 'POST';
+    const n = await fetch(`${appsEndpoint}/setup-example-app`, {
+        ...fetchInit,
+        body: 'configured=true', // update the configured property
+    });
 
     return n;
 }
 
 const DependencyCheck = () => {
     // create state variables using state hooks
+    const [appsList, setAppsList] = useState([]);
 
-    const [password, setPassword] = useState();
-    const [isValid, setValid] = useState(false);
+    // the app we want to check against
+    const dependency = 'search';
 
-    getApps().then((r) => {
-        console.log(r.entry);
-    });
+    useEffect(() => {
+        // get our app data from the getApps function after rendering for the first time
+        getApps().then((r) => {
+            const list = r.entry.map((entry) => entry.name);
+            setAppsList(list);
+        });
+    }, []); // useEffect only runs once due to the empty array
 
-    // const passwordClick = () => {
-    //     if (isValid) {
-    //         createPassword(password).then((response) => {
-    //             if (response.status >= 200 && response.status <= 299) {
-    //                 // check if password was successfully stored
-    //                 updateAppConf().then((r) => {
-    //                     // update app.conf
-    //                     if (r.status >= 200 && r.status <= 299) {
-    //                         // if app.conf is successfully updated, then reload the page
-    //                         window.location.href =
-    //                             'http://localhost:8001/en-US/app/setup-example-app/search';
-    //                     }
-    //                 });
-    //             } else {
-    //                 console.log('error');
-    //             }
-    //         });
-    //     }
-    // };
+    const checkDependency = () => {
+        // this function checks whether or not our dependency is in our apps list, if so then update app.conf to complete setup and reload the app
+        if (appsList.includes(dependency)) {
+            updateAppConf().then((r) => {
+                // update app.conf
+                if (r.status >= 200 && r.status <= 299) {
+                    // if app.conf is successfully updated, then reload the page
+                    window.location.href = '/en-US/app/setup-example-app/search';
+                }
+            });
+        } else {
+            console.log('error');
+        }
+    };
 
     return (
         // create the UI for the Setup Page
@@ -72,12 +79,16 @@ const DependencyCheck = () => {
                         password or an API key from the user.
                         <br />
                         <br />
-                        This page of the Setup Example app will run a dependency check for the
-                        Search and Reporting app, so it should always pass. The app itsled also
-                        shows a more traditional setup flow for secret storage as well. Check out
-                        the GitHub to lean how to switch between the pages to explore the examples.
-                        You can use the code provided in this app to help build setup pages in your
-                        apps.
+                        This page of the <b>Setup Example App</b> will run a dependency check for
+                        the <b>Search and Reporting</b> app, so it should always pass. The app
+                        itself also shows a more traditional setup flow for secret storage as well.
+                        Check out the{' '}
+                        <Link to="https://github.com/splunk/SUIT-setup-page-example/tree/main">
+                            GitHub
+                        </Link>{' '}
+                        to learn how to switch between the pages to explore the examples, or to test
+                        this example with different app dependencies. You can use the code provided
+                        in the GitHub to help build setup pages in your apps.
                         <br />
                         <br />
                         You can check a detailed explanation of this workflow in{' '}
@@ -136,7 +147,7 @@ const DependencyCheck = () => {
                                 type="submit"
                                 label="Perform Setup"
                                 name="setup_button"
-                                // onClick={passwordClick} // complete setup by running the password click function
+                                onClick={checkDependency} // complete setup by running the password click function
                             />
                         </div>
                         <br />

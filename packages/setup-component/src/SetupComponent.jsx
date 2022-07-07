@@ -17,7 +17,7 @@ async function updateAppConf() {
     const fetchInit = defaultFetchInit; // from splunk-utils API
     fetchInit.method = 'POST';
     const n = await fetch(
-        'http://localhost:8000/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/setup-example-app',
+        '/en-US/splunkd/__raw/servicesNS/nobody/system/apps/local/setup-example-app',
 
         {
             ...fetchInit,
@@ -28,17 +28,16 @@ async function updateAppConf() {
     return n;
 }
 
-async function getPasswords() {
-    const fetchInit = defaultFetchInit; // from splunk-utils API
-    fetchInit.method = 'GET';
-    const n = await fetch(`${passwordsEndpoint}?output_mode=json`, {
-        ...fetchInit,
-    }).then((response) => {
-        return response.json();
-    });
+// async function getPasswords() {
+//     // this function can be used to retrieve passwords if that becomes necessary in your app
+//     const fetchInit = defaultFetchInit; // from splunk-utils API
+//     fetchInit.method = 'GET';
+//     const n = await fetch(`${passwordsEndpoint}?output_mode=json`, {
+//         ...fetchInit,
+//     }).then(handleResponse(200));
 
-    return n;
-}
+//     return n;
+// }
 
 /* Function to create a Password */
 async function createPassword(password) {
@@ -61,9 +60,6 @@ const SetupComponent = () => {
     const [password, setPassword] = useState();
     const [isValid, setValid] = useState(false);
 
-    console.log(password);
-    console.log(getPasswords());
-
     const passwordClick = () => {
         if (isValid) {
             createPassword(password).then((response) => {
@@ -73,8 +69,7 @@ const SetupComponent = () => {
                         // update app.conf
                         if (r.status >= 200 && r.status <= 299) {
                             // if app.conf is successfully updated, then reload the page
-                            window.location.href =
-                                'http://localhost:8000/en-US/app/setup-example-app/search';
+                            window.location.href = 'en-US/app/setup-example-app/search';
                         }
                     });
                 } else {
@@ -85,6 +80,7 @@ const SetupComponent = () => {
     };
 
     const handleUserInput = (event) => {
+        // add password input error handling here
         if (event.target.value.length > 5) {
             setValid(true);
         } else {
@@ -107,15 +103,21 @@ const SetupComponent = () => {
                                     that it can perform the functionality it was designed for. This
                                     can include: saving user-provided configuratiions in .conf
                                     files, integrating with external services through REST API and
-                                    checking for app dependencies.
+                                    checking for app dependencies. You can check out the app
+                                    dependency example for this app by visiting the project&apos;s{' '}
+                                    <Link to="https://github.com/splunk/SUIT-setup-page-example/tree/main">
+                                        GitHub
+                                    </Link>{' '}
+                                    page.
                                     <br />
                                     <br />
                                     This setup page is a small example of the many different use
                                     cases, and it will create/modify two files in the local
                                     directory of this Splunk App.
                                     <br />
-                                    Splunk App Directory Path:
-                                    $SPLUNK_HOME/etc/apps/developer_guidance_setup_view/local/
+                                    <br />
+                                    <b>Splunk App Directory Path:</b>{' '}
+                                    $SPLUNK_HOME/etc/apps/setup-example-app/local/
                                     <List>
                                         <List.Item>
                                             <Link to="https://docs.splunk.com/Documentation/Splunk/latest/Admin/Appconf">
@@ -123,8 +125,8 @@ const SetupComponent = () => {
                                             </Link>
                                             <List style={{ margin: 0 }}>
                                                 <List.Item>
-                                                    Sets the [install] stanza `is_configured`
-                                                    property to `true`
+                                                    Sets the [install] stanza <b>is_configured</b>{' '}
+                                                    property to <b>true</b>
                                                 </List.Item>
                                             </List>
                                         </List.Item>
@@ -134,18 +136,18 @@ const SetupComponent = () => {
                                             </Link>
                                             <List style={{ margin: 0 }}>
                                                 <List.Item>
-                                                    Creates and encrypts the API key, resulting in a
-                                                    new passwords.conf stanza.
+                                                    Creates and encrypts the password, resulting in
+                                                    a new passwords.conf stanza.
                                                 </List.Item>
                                             </List>
                                         </List.Item>
                                     </List>
                                     In some cases, you can even introduce custom setup options and
                                     parameters, which would require an additional file. For example,
-                                    if you wanted the user to specify an API Key.
+                                    if you wanted the user to specify a custom configuration.
                                     <List>
                                         <List.Item>
-                                            setup_view_example.conf
+                                            custom_setup.conf
                                             <List style={{ margin: 0 }}>
                                                 <List.Item>
                                                     Creates a custom conf file to manage Splunk App
@@ -153,10 +155,6 @@ const SetupComponent = () => {
                                                 </List.Item>
                                                 <List.Item>
                                                     Creates the stanza [example_stanza]
-                                                </List.Item>
-                                                <List.Item>
-                                                    Creates the property `api_url` in the
-                                                    [example_stanza] and assigns the `API URL` to it
                                                 </List.Item>
                                             </List>
                                         </List.Item>
@@ -180,8 +178,8 @@ const SetupComponent = () => {
                                     </div>
                                     <Heading level={2}>Complete the Setup</Heading>
                                     <div>
-                                        Please press the `Perform Setup` button below to complete
-                                        the Splunk App setup.
+                                        Please press the <b>Perform Setup</b> button below to
+                                        complete the Splunk App setup.
                                     </div>
                                     <br />
                                     <div>
@@ -199,10 +197,10 @@ const SetupComponent = () => {
                             <ColumnLayout.Column span={6}>
                                 <div className="right">
                                     <Heading level={2}>Implementation Overview</Heading>
-                                    Splunk Setup pages can be made with various Splunk provided
-                                    developer tools. This app utilizes the new Splunk UI Toolkit,
-                                    allowing for consistent visual components and responsive app
-                                    interaction with ReactJS packages.
+                                    Splunk setup pages can be made with various Splunk provided
+                                    developer tools. This app utilizes the new{' '}
+                                    <b>Splunk UI Toolkit</b>, allowing for consistent visual
+                                    components and responsive app interaction with ReactJS packages.
                                     <br />
                                     <Heading level={2}>Packages</Heading>
                                     <List>
@@ -213,7 +211,7 @@ const SetupComponent = () => {
                                             <List style={{ margin: 0 }}>
                                                 <List.Item>
                                                     Generates the entire Splunk App, allowing for
-                                                    easy creation of a cloud ready Splunk App with
+                                                    easy creation of a cloud-ready Splunk App with
                                                     ReactJS
                                                 </List.Item>
                                             </List>
@@ -255,6 +253,11 @@ const SetupComponent = () => {
                                         <List.Item>
                                             <Link to="https://dev.splunk.com">
                                                 Splunk Platform Developer Documentation
+                                            </Link>
+                                        </List.Item>
+                                        <List.Item>
+                                            <Link to="https://github.com/splunk/SUIT-setup-page-example/tree/main">
+                                                GitHub Link for this app
                                             </Link>
                                         </List.Item>
                                     </List>
