@@ -40,6 +40,9 @@ asking, `format:verify` won't.
 
 Running `yarn run setup` once is required to enable all other tasks. The command might take a few minutes to finish.
 
+## Switching between Examples
+
+This app contains to different examples, one for a typical setup page that stores a secret in the storage/passwords endpoint, you can switch between these examples by switching which component appears in the Start page. packages/setup-example-app/src/main/webapp/pages/start/index.jsx
 
 ## Developer Scripts
 
