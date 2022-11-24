@@ -20,8 +20,11 @@
   },
   "main": "SetupComponent.js",
   "dependencies": {
-    "@splunk/react-ui": "^4.2.0",
+    "@splunk/react-ui": "^4.14.0",
     "@splunk/themes": "^0.8.0"
+  },
+  "resolutions": {
+    "moment": "2.29.4"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",

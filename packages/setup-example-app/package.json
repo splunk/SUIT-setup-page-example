@@ -14,13 +14,16 @@
     "stylelint": "stylelint \"src/**/*.{js,jsx}\" --config stylelint.config.js"
   },
   "dependencies": {},
+  "resolutions": {
+    "moment": "2.29.4"
+  },
   "devDependencies": {
     "@babel/core": "^7.2.0",
-    "@splunk/setup-component": "^0.0.1",
     "@splunk/babel-preset": "^3.0.0",
     "@splunk/eslint-config": "^4.0.0",
     "@splunk/react-page": "^5.1.0",
-    "@splunk/react-ui": "^4.3.0",
+    "@splunk/react-ui": "^4.14.0",
+    "@splunk/setup-component": "^0.0.1",
     "@splunk/splunk-utils": "^2.1.0",
     "@splunk/stylelint-config": "^4.0.0",
     "@splunk/themes": "^0.9.0",
